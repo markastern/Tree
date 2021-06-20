@@ -3,16 +3,34 @@ include_once('ITree.php');
 
 class MissingNodeException extends Exception
 {
-    public function __construct(int $node_id, Throwable $previous = NULL) {
+    public function __construct(int $node_id, Throwable $previous = NULL)
+    {
         parent::__construct("Node $node_id does not exist in the tree.", 0, $previous);
     }
 }
 
 class MissingKeyException extends Exception
 {
-    public function __construct(String $key, Throwable $previous = NULL) {
+    public function __construct(String $key, Throwable $previous = NULL)
+    {
         parent::__construct("An element of the initialization array is missing a required key: $key.", 0, $previous);
     }   
+}
+
+class MissingRootException extends Exception
+{
+    public function __construct(Throwable $previous = NULL)
+    {
+        parent::__construct("The tree does not have a root.", 0, $previous);
+    }
+}
+
+class DoubleRootException extends Exception
+{
+    public function __construct(Throwable $previous = NULL)
+    {
+        parent::__construct("The tree has two roots (only one allowed).", 0, $previous);
+    }
 }
 
 class Node
@@ -55,6 +73,9 @@ class Tree implements ITree
             $parentId = $node['parent_id'];
             $value = $node['value'];
             if (is_null($parentId)) {
+                if (! is_null($this->root)) {
+                    throw new DoubleRootException();
+                }
                 $this->root = $id;
             }
             if (array_key_exists($id, $this->nodes)) {
@@ -74,6 +95,9 @@ class Tree implements ITree
                 $this->nodes[$parentId]->addChild($id);
             }
         }
+        if (is_null($this->root)) {
+            throw new MissingRootException();
+        }  
     }
 
     public function getRoot()
