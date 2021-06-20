@@ -8,6 +8,13 @@ class MissingNodeException extends Exception
     }
 }
 
+class MissingKeyException extends Exception
+{
+    public function __construct(String $key, Throwable $previous = NULL) {
+        parent::__construct("An element of the initialization array is missing a required key: $key.", 0, $previous);
+    }   
+}
+
 class Node
 {
     public $parentId;
@@ -36,6 +43,14 @@ class Tree implements ITree
     public function init(array $nodeData)
     {
         foreach ($nodeData as $node) {
+            if (! is_array($node)) {
+                throw new TypeError('Elements of initialization array must be arrays');
+            }
+            foreach (['id', 'parent_id', 'value'] as $key) {
+                if (!array_key_exists($key, $node)) {
+                    throw new MissingKeyException($key);
+                }
+            }
             $id = $node['id'];
             $parentId = $node['parent_id'];
             $value = $node['value'];
