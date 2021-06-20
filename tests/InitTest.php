@@ -87,5 +87,20 @@ final class InitTest extends TestCase
         $this->expectException(DoubleRootException::class);
         $tree->init($data);
     }
-    
+
+    public function testDuplicateIds(): void
+    {
+        $data = [
+            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
+            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
+            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
+            ['id' => 3, 'parent_id' => 2,    'value' => 'grandchild'],
+
+        ];
+        
+        $tree = new Tree();
+        $this->expectException(DuplicateIdsException::class);
+        $tree->init($data);
+    }
+
 }

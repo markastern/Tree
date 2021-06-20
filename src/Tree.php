@@ -33,6 +33,14 @@ class DoubleRootException extends Exception
     }
 }
 
+class DuplicateIDsException extends Exception
+{
+    public function __construct(int $id, Throwable $previous = NULL)
+    {
+        parent::__construct("Initialization array has two elements with the same id: $id.", 0, $previous);
+    }
+}
+
 class Node
 {
     public $parentId;
@@ -79,6 +87,9 @@ class Tree implements ITree
                 $this->root = $id;
             }
             if (array_key_exists($id, $this->nodes)) {
+                if (! is_null($this->nodes[$id]->value)) {
+                    throw new DuplicateIDsException($id);
+                }
                 // Already created when we created a child
                 $nodeObject = $this->nodes[$id];
             } else {
