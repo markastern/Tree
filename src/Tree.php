@@ -1,6 +1,13 @@
 <?php
 include_once('ITree.php');
 
+class MissingNodeException extends Exception
+{
+    public function __construct(int $node_id, Throwable $previous = NULL) {
+        parent::__construct("Node $node_id does not exist in the tree.", 0, $previous);
+    }
+}
+
 class Node
 {
     public $parentId;
@@ -61,16 +68,25 @@ class Tree implements ITree
 
     public function getParent(int $node_id)
     {
+        if (! array_key_exists($node_id, $this->nodes)) {
+            throw new MissingNodeException($node_id);
+        }
         return $this->nodes[$node_id]->parentId;
     }
 
     public function getChildren(int $node_id): array
     {
+        if (! array_key_exists($node_id, $this->nodes)) {
+            throw new MissingNodeException($node_id);
+        }
         return $this->nodes[$node_id]->children;
     }
 
     public function getValue(int $node_id): String
     {
+        if (! array_key_exists($node_id, $this->nodes)) {
+            throw new MissingNodeException($node_id);
+        }
         return $this->nodes[$node_id]->value;
     }
 
