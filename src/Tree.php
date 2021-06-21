@@ -41,17 +41,27 @@ class DuplicateIDsException extends Exception
     }
 }
 
+class OrphanException extends Exception
+{
+    public function __construct(int $id, Throwable $previous = NULL)
+    {
+        parent::__construct("Node with id $id is not reachable from the root of the tree.", 0, $previous);
+    }    
+}
+
 class Node
 {
     public $parentId;
     public $children;
     public $value;
+    public $verified;
 
     function __construct()
     {
         $this->parentId = NULL;
         $this->children = [];
         $this->value = NULL;
+        $this->verified = FALSE;
     }
 
     public function addChild(int $id)
@@ -65,6 +75,15 @@ class Tree implements ITree
 {
     protected $root = NULL;
     protected $nodes = [];
+
+    protected function verifyNodes(int $root)
+    {
+        $node = $this->nodes[$root];
+        $node->verified = TRUE;
+        foreach ($node->children as $child) {
+            $this->verifyNodes($child);
+        }
+    }
 
     public function init(array $nodeData)
     {
@@ -108,7 +127,13 @@ class Tree implements ITree
         }
         if (is_null($this->root)) {
             throw new MissingRootException();
-        }  
+        }
+        $this->verifyNodes($this->root);
+        foreach ($this->nodes as $id => $node) {
+            if ($node->verified === FALSE) {
+                throw new OrphanException($id);
+            }
+        }
     }
 
     public function getRoot()

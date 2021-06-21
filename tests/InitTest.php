@@ -103,4 +103,38 @@ final class InitTest extends TestCase
         $tree->init($data);
     }
 
+    public function testOrphan(): void
+    {
+        $data = [
+            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
+            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
+            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
+            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
+            ['id' => 6, 'parent_id' => 5,    'value' => 'orphan'],
+        ];
+        
+        $tree = new Tree();
+        $this->expectException(OrphanException::class);
+        $tree->init($data);
+    }
+
+    public function testLoop(): void
+    {
+        $data = [
+            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
+            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
+            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
+            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
+            ['id' => 5, 'parent_id' => 6,    'value' => "I'm my own grandpa"],
+            ['id' => 6, 'parent_id' => 5,    'value' => 'father/son'],
+        ];
+        
+        $tree = new Tree();
+        $this->expectException(OrphanException::class);
+        $tree->init($data);
+    } 
+    
+
+
+
 }
