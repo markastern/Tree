@@ -172,4 +172,9 @@ class Tree implements ITree
             $this->verifyNodes($child);
         }
     }
+
+    function __toString()
+    {
+        return print_r($this->nodes, true);
+    }
 }
