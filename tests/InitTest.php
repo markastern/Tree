@@ -1,140 +1,71 @@
 <?php declare(strict_types=1);
-use PHPUnit\Framework\TestCase;
+include_once 'TestCase.php';
 
 final class InitTest extends TestCase
 {
     public function testCannotInitializeFromNonArray(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-            "fred"
-        ];
-        
-        $tree = new Tree();
+        $this->data[] = "fred";
         $this->expectException(TypeError::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testMissingId(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            [           'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
+        unset($this->data[3]['id']);
         $this->expectException(MissingKeyException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testMissingParentId(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4,                      'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
+        unset($this->data[3]['parent_id']);
         $this->expectException(MissingKeyException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testMissingValue(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2],
-        ];
-        
-        $tree = new Tree();
+        unset($this->data[3]['value']);
         $this->expectException(MissingKeyException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testMissingRoot(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
+        $this->data = array_filter($this->data, function ($node) {
+            return !is_null($node['parent_id']);
+        });
         $this->expectException(MissingRootException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testTwoRoots(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => null, 'value' => 'grandchild'],
-
-        ];
-        
-        $tree = new Tree();
+        $this->data[3]['parent_id'] = null;
         $this->expectException(DoubleRootException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testDuplicateIds(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 3, 'parent_id' => 2,    'value' => 'grandchild'],
-
-        ];
-        
-        $tree = new Tree();
+        $this->data[3]['id'] = $this->data[2]['id'];
         $this->expectException(DuplicateIdsException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testOrphan(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-            ['id' => 6, 'parent_id' => 5,    'value' => 'orphan'],
-        ];
-        
-        $tree = new Tree();
+        $this->data[] = ['id' => 6, 'parent_id' => 5,    'value' => 'orphan'];
         $this->expectException(OrphanException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     }
 
     public function testLoop(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-            ['id' => 5, 'parent_id' => 6,    'value' => "I'm my own grandpa"],
-            ['id' => 6, 'parent_id' => 5,    'value' => 'father/son'],
-        ];
-        
-        $tree = new Tree();
+        $this->data[] = ['id' => 5, 'parent_id' => 6,    'value' => "I'm my own grandpa"];
+        $this->data[] = ['id' => 6, 'parent_id' => 5,    'value' => 'father/son'];
         $this->expectException(OrphanException::class);
-        $tree->init($data);
+        $this->tree->init($this->data);
     } 
-    
-
-
-
-}
+ }

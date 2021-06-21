@@ -1,50 +1,26 @@
 <?php declare(strict_types=1);
-use PHPUnit\Framework\TestCase;
+include_once 'TestCase.php';
 
 final class GetValueTest extends TestCase
 {
     public function testCanGetValueFromTree(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
-        $this->assertEquals('Sharon- child 2', $tree->getValue(3));
+        $this->tree->init($this->data);
+        $this->assertEquals('Sharon- child 2', $this->tree->getValue(3));
     }
 
     public function testCannotGetValueFromMissingNode(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
+        $this->tree->init($this->data);
         $this->expectException(MissingNodeException::class);
-        $tree->getValue(5);
+        $this->tree->getValue(5);
     }
 
     public function testCannotGetValueFromInvalidNode(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
+        $this->tree->init($this->data);
         $this->expectException(TypeError::class);
-        $tree->getValue("fred");
+        $this->tree->getValue("fred");
     }
 
 }

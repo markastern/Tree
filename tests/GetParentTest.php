@@ -1,63 +1,31 @@
 <?php declare(strict_types=1);
-use PHPUnit\Framework\TestCase;
+include_once 'TestCase.php';
 
 final class GetParentTest extends TestCase
 {
     public function testCanGetParentFromTree(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
-        $this->assertEquals(2, $tree->getParent(4));
+        $this->tree->init($this->data);
+        $this->assertEquals(2, $this->tree->getParent(4));
     }
 
     public function testCanGetParentFromRootNodeOfTree(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-
-        $tree = new Tree();
-        $tree->init($data);
-        $this->assertNull($tree->getParent(1));
+        $this->tree->init($this->data);
+        $this->assertNull($this->tree->getParent(1));
     }
 
     public function testCannotGetParentFromMissingNode(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
+        $this->tree->init($this->data);
         $this->expectException(MissingNodeException::class);
-        $tree->getParent(5);
+        $this->tree->getParent(5);
     }
 
     public function testCannotGetParentFromInvalidNode(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
+        $this->tree->init($this->data);
         $this->expectException(TypeError::class);
-        $tree->getParent("fred");
+        $this->tree->getParent("fred");
     }
 }

@@ -1,50 +1,27 @@
 <?php declare(strict_types=1);
-use PHPUnit\Framework\TestCase;
+include_once('TestCase.php');
 
 final class GetChildrenTest extends TestCase
 {
     public function testCanGetChildrenFromTree(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
-        $this->assertEquals([2, 3], $tree->getChildren(1));
+        $this->tree->init($this->data);
+        $children = $this->tree->getChildren(1);
+        sort($children);
+        $this->assertEquals([2, 3], $children);
     }
 
     public function testCannotGetChildrenFromMissingNode(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
+        $this->tree->init($this->data);
         $this->expectException(MissingNodeException::class);
-        $tree->getChildren(5);
+        $this->tree->getChildren(5);
     }
 
     public function testCannotGetChildrenFromInvalidNode(): void
     {
-        $data = [
-            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
-            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
-            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
-            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
-        ];
-        
-        $tree = new Tree();
-        $tree->init($data);
+        $this->tree->init($this->data);
         $this->expectException(TypeError::class);
-        $tree->getChildren("fred");
+        $this->tree->getChildren("fred");
     }
-
 }
