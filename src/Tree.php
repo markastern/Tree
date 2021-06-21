@@ -27,15 +27,6 @@ class Tree implements ITree
     protected $root = NULL;
     protected $nodes = [];
 
-    protected function verifyNodes(int $root)
-    {
-        $node = $this->nodes[$root];
-        $node->verified = TRUE;
-        foreach ($node->children as $child) {
-            $this->verifyNodes($child);
-        }
-    }
-
     /**
      * Initialize the tree from an array of nodes. Each node is an
      * array with the following keys:
@@ -71,6 +62,13 @@ class Tree implements ITree
                     throw new DoubleRootException();
                 }
                 $this->root = $id;
+            } else {
+                /* Add this node as a child to the parent. If the parent
+                   has not been created yet, create it. */
+                if (! array_key_exists($parentId, $this->nodes)) {
+                    $this->nodes[$parentId] = new Node();
+                }
+                $this->nodes[$parentId]->addChild($id);
             }
             if (array_key_exists($id, $this->nodes)) {
                 if (! is_null($this->nodes[$id]->value)) {
@@ -84,13 +82,6 @@ class Tree implements ITree
             }
             $nodeObject->parentId = $parentId;
             $nodeObject->value = $value;
-
-            if (! is_null($parentId)) {
-                if (! array_key_exists($parentId, $this->nodes)) {
-                    $this->nodes[$parentId] = new Node();
-                }
-                $this->nodes[$parentId]->addChild($id);
-            }
         }
         if (is_null($this->root)) {
             throw new MissingRootException();
@@ -98,11 +89,22 @@ class Tree implements ITree
         $this->checkAllNodesReachable();
     }
 
+    /**
+     * Returns the node id of the root node.
+     */
     public function getRoot()
     {
         return $this->root;
     }
 
+    /**
+     * Return the node id of the parent node of $node_id.
+     * This will be null if $node_id is the root node.
+     *
+     * @param int $node_id
+     * @return mixed
+     * @throws MissingNodeException
+     */
     public function getParent(int $node_id)
     {
         if (! array_key_exists($node_id, $this->nodes)) {
@@ -111,6 +113,13 @@ class Tree implements ITree
         return $this->nodes[$node_id]->parentId;
     }
 
+    /**
+     * Return an array of all the node ids of the children of $node_id.
+     *
+     * @param int $node_id
+     * @return array
+     * @throws MissingNodeException
+     */
     public function getChildren(int $node_id): array
     {
         if (! array_key_exists($node_id, $this->nodes)) {
@@ -119,6 +128,13 @@ class Tree implements ITree
         return $this->nodes[$node_id]->children;
     }
 
+    /**
+     * Return the value stored at node $node_id.
+     *
+     * @param int $node_id
+     * @return String
+     * @throws MissingNodeException
+     */
     public function getValue(int $node_id): String
     {
         if (! array_key_exists($node_id, $this->nodes)) {
@@ -127,14 +143,33 @@ class Tree implements ITree
         return $this->nodes[$node_id]->value;
     }
 
-    public function checkAllNodesReachable(): void
+    /**
+     * Check that all the nodes in the tree are actually reachable from the root node.
+     * First mark all reachable nodes as verified, then look for ant that are not verified.
+     *
+     * @throws OrphanException
+     */
+    protected function checkAllNodesReachable(): void
     {
         $this->verifyNodes($this->root);
         foreach ($this->nodes as $id => $node) {
-            if ($node->verified === FALSE) {
+            if (! $node->verified) {
                 throw new OrphanException($id);
             }
         }
     }
 
+    /**
+     * Recursively mark all nodes reachable from the specified node as verified.
+     *
+     * @param int $root
+     */
+    protected function verifyNodes(int $root)
+    {
+        $node = $this->nodes[$root];
+        $node->verified = TRUE;
+        foreach ($node->children as $child) {
+            $this->verifyNodes($child);
+        }
+    }
 }

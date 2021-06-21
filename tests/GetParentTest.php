@@ -17,6 +17,20 @@ final class GetParentTest extends TestCase
         $this->assertEquals(2, $tree->getParent(4));
     }
 
+    public function testCanGetParentFromRootNodeOfTree(): void
+    {
+        $data = [
+            ['id' => 2, 'parent_id' => 1,    'value' => 'David- child 1'],
+            ['id' => 1, 'parent_id' => null, 'value' => 'Grandfather- root'],
+            ['id' => 3, 'parent_id' => 1,    'value' => 'Sharon- child 2'],
+            ['id' => 4, 'parent_id' => 2,    'value' => 'grandchild'],
+        ];
+
+        $tree = new Tree();
+        $tree->init($data);
+        $this->assertNull($tree->getParent(1));
+    }
+
     public function testCannotGetParentFromMissingNode(): void
     {
         $data = [
