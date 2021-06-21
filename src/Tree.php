@@ -1,53 +1,4 @@
 <?php
-include_once('ITree.php');
-
-class MissingNodeException extends Exception
-{
-    public function __construct(int $node_id, Throwable $previous = NULL)
-    {
-        parent::__construct("Node $node_id does not exist in the tree.", 0, $previous);
-    }
-}
-
-class MissingKeyException extends Exception
-{
-    public function __construct(String $key, Throwable $previous = NULL)
-    {
-        parent::__construct("An element of the initialization array is missing a required key: $key.", 0, $previous);
-    }   
-}
-
-class MissingRootException extends Exception
-{
-    public function __construct(Throwable $previous = NULL)
-    {
-        parent::__construct("The tree does not have a root.", 0, $previous);
-    }
-}
-
-class DoubleRootException extends Exception
-{
-    public function __construct(Throwable $previous = NULL)
-    {
-        parent::__construct("The tree has two roots (only one allowed).", 0, $previous);
-    }
-}
-
-class DuplicateIDsException extends Exception
-{
-    public function __construct(int $id, Throwable $previous = NULL)
-    {
-        parent::__construct("Initialization array has two elements with the same id: $id.", 0, $previous);
-    }
-}
-
-class OrphanException extends Exception
-{
-    public function __construct(int $id, Throwable $previous = NULL)
-    {
-        parent::__construct("Node with id $id is not reachable from the root of the tree.", 0, $previous);
-    }    
-}
 
 class Node
 {
@@ -85,6 +36,21 @@ class Tree implements ITree
         }
     }
 
+    /**
+     * Initialize the tree from an array of nodes. Each node is an
+     * array with the following keys:
+     *
+     * id - an integer identifier for the node
+     * parent-id - the identifier of the parent node (NULL for the root node)
+     * value - a String value of the node
+     *
+     * @param array $nodeData
+     * @throws DoubleRootException
+     * @throws DuplicateIDsException
+     * @throws MissingKeyException
+     * @throws MissingRootException
+     * @throws OrphanException
+     */
     public function init(array $nodeData)
     {
         foreach ($nodeData as $node) {
@@ -101,6 +67,7 @@ class Tree implements ITree
             $value = $node['value'];
             if (is_null($parentId)) {
                 if (! is_null($this->root)) {
+                    // The root has already been defined
                     throw new DoubleRootException();
                 }
                 $this->root = $id;
@@ -128,12 +95,7 @@ class Tree implements ITree
         if (is_null($this->root)) {
             throw new MissingRootException();
         }
-        $this->verifyNodes($this->root);
-        foreach ($this->nodes as $id => $node) {
-            if ($node->verified === FALSE) {
-                throw new OrphanException($id);
-            }
-        }
+        $this->checkAllNodesReachable();
     }
 
     public function getRoot()
@@ -163,6 +125,16 @@ class Tree implements ITree
             throw new MissingNodeException($node_id);
         }
         return $this->nodes[$node_id]->value;
+    }
+
+    public function checkAllNodesReachable(): void
+    {
+        $this->verifyNodes($this->root);
+        foreach ($this->nodes as $id => $node) {
+            if ($node->verified === FALSE) {
+                throw new OrphanException($id);
+            }
+        }
     }
 
 }
