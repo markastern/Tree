@@ -70,18 +70,7 @@ class Tree implements ITree
                 }
                 $this->nodes[$parentId]->addChild($id);
             }
-            if (array_key_exists($id, $this->nodes)) {
-                if (! is_null($this->nodes[$id]->value)) {
-                    throw new DuplicateIDsException($id);
-                }
-                // Already created when we created a child
-                $nodeObject = $this->nodes[$id];
-            } else {
-                $nodeObject = new Node();
-                $this->nodes[$id] = $nodeObject;
-            }
-            $nodeObject->parentId = $parentId;
-            $nodeObject->value = $value;
+            $this->populateNode($id, $parentId, $value);
         }
         if (is_null($this->root)) {
             throw new MissingRootException();
@@ -172,6 +161,31 @@ class Tree implements ITree
             $this->verifyNodes($child);
         }
     }
+
+    /**
+     * Create a new node with the specified id, parent id and value.
+     *
+     * @param $id
+     * @param $parentId
+     * @param $value
+     * @throws DuplicateIDsException
+     */
+    protected function populateNode($id, $parentId, $value): void
+    {
+        if (array_key_exists($id, $this->nodes)) {
+            if (!is_null($this->nodes[$id]->value)) {
+                throw new DuplicateIDsException($id);
+            }
+            // Already created when we created a child
+            $nodeObject = $this->nodes[$id];
+        } else {
+            $nodeObject = new Node();
+            $this->nodes[$id] = $nodeObject;
+        }
+        $nodeObject->parentId = $parentId;
+        $nodeObject->value = $value;
+    }
+
 
     function __toString()
     {
