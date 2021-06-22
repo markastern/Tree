@@ -17,6 +17,33 @@ class MissingKeyException extends TreeException
     }
 }
 
+class InvalidIDException extends TreeException
+{
+    public function __construct(Throwable $previous = NULL)
+    {
+        parent::__construct("An element of the initialization array has an invalid id", 0, $previous);
+    }
+}
+
+class InvalidParentIDException extends TreeException
+{
+    public function __construct(Throwable $previous = NULL)
+    {
+        parent::__construct("An element of the initialization array has an invalid parent_id.", 0, $previous);
+    }
+}
+
+class InvalidValueException extends TreeException
+{
+    public function __construct(Throwable $previous = NULL)
+    {
+        parent::__construct("An element of the initialization array has an invalid value.", 0, $previous);
+    }
+}
+
+
+
+
 class MissingRootException extends TreeException
 {
     public function __construct(Throwable $previous = NULL)

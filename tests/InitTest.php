@@ -31,6 +31,27 @@ final class InitTest extends TestCase
         $this->tree->init($this->data);
     }
 
+    public function testInvalidId(): void
+    {
+        $this->data[3]['id'] = [3];
+        $this->expectException(InvalidIDException::class);
+        $this->tree->init($this->data);
+    }
+
+    public function testInvalidParentId(): void
+    {
+        $this->data[3]['parent_id'] = "dad";
+        $this->expectException(InvalidParentIDException::class);
+        $this->tree->init($this->data);
+    }
+
+    public function testInvalidValue(): void
+    {
+        $this->data[3]['value'] = 3;
+        $this->expectException(InvalidValueException::class);
+        $this->tree->init($this->data);
+    }
+
     public function testMissingRoot(): void
     {
         $this->data = array_filter($this->data, function ($node) {

@@ -53,6 +53,7 @@ class Tree implements ITree
                     throw new MissingKeyException($key);
                 }
             }
+            $this->checkNodeValues($node);
             $id = $node['id'];
             $parentId = $node['parent_id'];
             $value = $node['value'];
@@ -186,6 +187,26 @@ class Tree implements ITree
         $nodeObject->value = $value;
     }
 
+    /**
+     * Checks the types of an individual node in the initialization array.
+     *
+     * @param array $node
+     * @throws InvalidIDException
+     * @throws InvalidParentIDException
+     * @throws InvalidValueException
+     */
+    function checkNodeValues(array $node)
+    {
+        if (! is_int($node['id'])) {
+            throw new InvalidIDException();
+        }
+        if (! (is_int($node['parent_id']) || is_null($node['parent_id']))) {
+            throw new InvalidParentIDException();
+        }
+        if (! is_string($node['value'])) {
+            throw new InvalidValueException();
+        }
+    }
 
     function __toString()
     {
