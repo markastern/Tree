@@ -38,6 +38,9 @@ class Tree implements ITree
      * @param array $nodeData
      * @throws DoubleRootException
      * @throws DuplicateIDsException
+     * @throws InvalidIDException
+     * @throws InvalidParentIDException
+     * @throws InvalidValueException
      * @throws MissingKeyException
      * @throws MissingRootException
      * @throws OrphanException
